@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Parametric Box Generator</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <div class="sidebar">
+      <h2>Box Settings</h2>
+      <label>Width (mm): <input type="number" id="width" value="100"></label>
+      <label>Depth (mm): <input type="number" id="depth" value="80"></label>
+      <label>Height (mm): <input type="number" id="height" value="60"></label>
+      <label>Thickness (mm): <input type="number" id="thickness" value="3" step="0.1"></label>
+      <button id="download-btn">Download SVG</button>
+    </div>
+    <div class="preview" id="svg-preview">
+      <!-- SVG renders here -->
+    </div>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>
