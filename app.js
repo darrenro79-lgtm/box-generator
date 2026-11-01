@@ -1,6 +1,7 @@
 // Function to generate finger joint paths for a panel
 function createPanelPath(width, height, thickness, tabSize, isFemaleX = false, isFemaleY = false) {
-  let path = '';
+  let path = '';const kerf = parseFloat(document.getElementById('kerf').value) || 0;
+const halfKerf = kerf / 2;
 
   let numTabsX = Math.max(3, Math.floor(width / tabSize));
   if (numTabsX % 2 === 0) numTabsX++;
@@ -15,7 +16,7 @@ function createPanelPath(width, height, thickness, tabSize, isFemaleX = false, i
   // Top Edge
   for (let i = 0; i < numTabsX; i++) {
     const x = (i + 1) * segW;
-    const isTab = (i % 2 === 0) ^ isFemaleX;
+    const yoff = isTab ? (-thickness - halfKerf) : halfKerf;
     const yOff = isTab ? -thickness : 0;
     path += `L ${x - segW} ${yOff} L ${x} ${yOff} `;
   }
@@ -23,8 +24,7 @@ function createPanelPath(width, height, thickness, tabSize, isFemaleX = false, i
   // Right Edge
   for (let i = 0; i < numTabsY; i++) {
     const y = (i + 1) * segH;
-    const isTab = (i % 2 === 0) ^ isFemaleY;
-    const xOff = isTab ? width + thickness : width;
+    const xoff = isTab ? (width + thickness + halfKerf) : (width - halfKerf);
     path += `L ${xOff} ${y - segH} L ${xOff} ${y} `;
   }
 
@@ -32,7 +32,7 @@ function createPanelPath(width, height, thickness, tabSize, isFemaleX = false, i
   for (let i = numTabsX - 1; i >= 0; i--) {
     const x = i * segW;
     const isTab = (i % 2 === 0) ^ isFemaleX;
-    const yOff = isTab ? height + thickness : height;
+    const yoff = isTab ? (height + thickness + halfKerf) : (height - halfKerf);
     path += `L ${x + segW} ${yOff} L ${x} ${yOff} `;
   }
 
@@ -151,3 +151,4 @@ document.getElementById('download-btn').addEventListener('click', downloadSVG);
 
 // Initial Render
 renderBox();
+document.getElementById('kerf').addEventListener('input', generateBox);
