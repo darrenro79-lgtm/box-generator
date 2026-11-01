@@ -1,6 +1,7 @@
 // Function to generate finger joint paths for a panel
 function createPanelPath(width, height, thickness, tabSize, isFemaleX = false, isFemaleY = false) {
-  let path = '';const kerf = parseFloat(document.getElementById('kerf').value) || 0;
+  let path = '';
+  const kerf = parseFloat(document.getElementById('kerf').value) || 0;
 const halfKerf = kerf / 2;
 
   let numTabsX = Math.max(3, Math.floor(width / tabSize));
@@ -14,12 +15,12 @@ const halfKerf = kerf / 2;
   path += `M 0 0 `;
 
   // Top Edge
-  for (let i = 0; i < numTabsX; i++) {
-    const x = (i + 1) * segW;
-    const yoff = isTab ? (-thickness - halfKerf) : halfKerf;
-    const yOff = isTab ? -thickness : 0;
-    path += `L ${x - segW} ${yOff} L ${x} ${yOff} `;
-  }
+for (let i = 0; i < numTabsX; i++) {
+  const x = (i + 1) * segW;
+  const isTab = (i % 2 === 0) ^ isFemaleX;
+  const yoff = isTab ? (-thickness - halfKerf) : halfKerf;
+  path += ` L ${x - segW} ${yoff} L ${x} ${yoff} `;
+}
 
   // Right Edge
   for (let i = 0; i < numTabsY; i++) {
