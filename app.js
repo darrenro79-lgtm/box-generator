@@ -12,7 +12,7 @@ function createPanelPath(width, height, thickness, tabsize, isFemaleX = false, i
   if (numTabsY % 2 === 0) numTabsY++;
   const segH = height / numTabsY;
 
-  path += M 0 0;
+  path += 'M 0 0 ';
 
   // Top Edge
   for (let i = 0; i < numTabsX; i++) {
