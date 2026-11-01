@@ -1,32 +1,33 @@
 // Function to generate finger joint paths for a panel
-function createPanelPath(width, height, thickness, tabSize, isFemaleX = false, isFemaleY = false) {
+function createPanelPath(width, height, thickness, tabsize, isFemaleX = false, isFemaleY = false) {
   let path = '';
   const kerf = parseFloat(document.getElementById('kerf').value) || 0;
-const halfKerf = kerf / 2;
+  const halfKerf = kerf / 2;
 
-  let numTabsX = Math.max(3, Math.floor(width / tabSize));
+  let numTabsX = Math.max(3, Math.floor(width / tabsize));
   if (numTabsX % 2 === 0) numTabsX++;
   const segW = width / numTabsX;
 
-  let numTabsY = Math.max(3, Math.floor(height / tabSize));
+  let numTabsY = Math.max(3, Math.floor(height / tabsize));
   if (numTabsY % 2 === 0) numTabsY++;
   const segH = height / numTabsY;
 
-  path += `M 0 0 `;
+  path += M 0 0;
 
   // Top Edge
-for (let i = 0; i < numTabsX; i++) {
-  const x = (i + 1) * segW;
-  const isTab = (i % 2 === 0) ^ isFemaleX;
-  const yoff = isTab ? (-thickness - halfKerf) : halfKerf;
-  path += ` L ${x - segW} ${yoff} L ${x} ${yoff} `;
-}
+  for (let i = 0; i < numTabsX; i++) {
+    const x = (i + 1) * segW;
+    const isTab = (i % 2 === 0) ^ isFemaleX;
+    const yoff = isTab ? (-thickness - halfKerf) : halfKerf;
+    path += ` L ${x - segW} ${yoff} L ${x} ${yoff}`;
+  }
 
   // Right Edge
   for (let i = 0; i < numTabsY; i++) {
     const y = (i + 1) * segH;
+    const isTab = (i % 2 === 0) ^ isFemaleY;
     const xoff = isTab ? (width + thickness + halfKerf) : (width - halfKerf);
-    path += `L ${xOff} ${y - segH} L ${xOff} ${y} `;
+    path += ` L ${xoff} ${y - segH} L ${xoff} ${y}`;
   }
 
   // Bottom Edge
@@ -34,18 +35,17 @@ for (let i = 0; i < numTabsX; i++) {
     const x = i * segW;
     const isTab = (i % 2 === 0) ^ isFemaleX;
     const yoff = isTab ? (height + thickness + halfKerf) : (height - halfKerf);
-    path += `L ${x + segW} ${yOff} L ${x} ${yOff} `;
+    path += ` L ${x + segW} ${yoff} L ${x} ${yoff}`;
   }
 
   // Left Edge
   for (let i = numTabsY - 1; i >= 0; i--) {
     const y = i * segH;
     const isTab = (i % 2 === 0) ^ isFemaleY;
-    const xOff = isTab ? -thickness : 0;
-    path += `L ${xOff} ${y + segH} L ${xOff} ${y} `;
+    const xoff = isTab ? (-thickness - halfKerf) : halfKerf;
+    path += ` L ${xoff} ${y + segH} L ${xoff} ${y}`;
   }
 
-  path += 'Z';
   return path;
 }
 
@@ -54,91 +54,77 @@ function renderBox() {
   const d = parseFloat(document.getElementById('depth').value) || 80;
   const h = parseFloat(document.getElementById('height').value) || 60;
   const t = parseFloat(document.getElementById('thickness').value) || 3;
-  const tabSize = 15;
+  const tabsize = 15;
 
-  const gap = 25;
-  const margin = 20;
+  const preview = document.getElementById('svg-preview');
+  
+  // Create 6 panel paths
+  const bottomPath = createPanelPath(w, d, t, tabsize, false, false);
+  const topPath = createPanelPath(w, d, t, tabsize, false, false);
+  const frontPath = createPanelPath(w, h, t, tabsize, true, false);
+  const backPath = createPanelPath(w, h, t, tabsize, true, false);
+  const leftPath = createPanelPath(d, h, t, tabsize, true, true);
+  const rightPath = createPanelPath(d, h, t, tabsize, true, true);
 
-  // Calculate layout grid positioning
-  const col1X = margin;
-  const col2X = col1X + w + gap + t * 2;
-  const col3X = col2X + w + gap + t * 2;
-
-  const row1Y = margin;
-  const row2Y = row1Y + Math.max(d, h) + gap + t * 2;
-
-  const totalWidth = col3X + d + margin + t * 2;
-  const totalHeight = row2Y + Math.max(d, h) + margin + t * 2;
-
-  // Create panel path definitions
-  const baseD  = createPanelPath(w, d, t, tabSize, false, false);
-  const topD   = createPanelPath(w, d, t, tabSize, false, false);
-  const frontD = createPanelPath(w, h, t, tabSize, true, false);
-  const backD  = createPanelPath(w, h, t, tabSize, true, false);
-  const leftD  = createPanelPath(d, h, t, tabSize, true, true);
-  const rightD = createPanelPath(d, h, t, tabSize, true, true);
+  const padding = 20;
+  const svgWidth = (w + d) * 2 + padding * 5;
+  const svgHeight = (h + d) * 2 + padding * 5;
 
   const svgContent = `
-    <svg width="100%" height="100%" viewBox="0 0 ${totalWidth} ${totalHeight}" xmlns="http://www.w3.org/2000/svg">
-      <!-- Base -->
-      <g transform="translate(${col1X}, ${row1Y})">
-        <path d="${baseD}" fill="none" stroke="#0066cc" stroke-width="1"/>
-        <text x="${w/2}" y="${d/2}" font-size="8" text-anchor="middle" fill="#333">Base (${w}x${d}mm)</text>
+    <svg id="box-svg" width="100%" height="100%" viewBox="0 0 ${svgWidth} ${svgHeight}" xmlns="http://www.w3.org/2000/svg">
+      <g transform="translate(${padding + t}, ${padding + t})">
+        <path d="${bottomPath}" fill="none" stroke="#0066cc" stroke-width="1" />
+        <text x="${w/2}" y="${d/2}" text-anchor="middle" fill="#333" font-size="12">Base (${w}x${d}mm)</text>
       </g>
 
-      <!-- Top -->
-      <g transform="translate(${col1X}, ${row2Y})">
-        <path d="${topD}" fill="none" stroke="#0066cc" stroke-width="1"/>
-        <text x="${w/2}" y="${d/2}" font-size="8" text-anchor="middle" fill="#333">Top (${w}x${d}mm)</text>
+      <g transform="translate(${padding + t}, ${d + padding * 2 + t})">
+        <path d="${topPath}" fill="none" stroke="#0066cc" stroke-width="1" />
+        <text x="${w/2}" y="${d/2}" text-anchor="middle" fill="#333" font-size="12">Top (${w}x${d}mm)</text>
       </g>
 
-      <!-- Front -->
-      <g transform="translate(${col2X}, ${row1Y})">
-        <path d="${frontD}" fill="none" stroke="#1d3557" stroke-width="1"/>
-        <text x="${w/2}" y="${h/2}" font-size="8" text-anchor="middle" fill="#333">Front (${w}x${h}mm)</text>
+      <g transform="translate(${w + padding * 2 + t}, ${padding + t})">
+        <path d="${frontPath}" fill="none" stroke="#0066cc" stroke-width="1" />
+        <text x="${w/2}" y="${h/2}" text-anchor="middle" fill="#333" font-size="12">Front (${w}x${h}mm)</text>
       </g>
 
-      <!-- Back -->
-      <g transform="translate(${col2X}, ${row2Y})">
-        <path d="${backD}" fill="none" stroke="#1d3557" stroke-width="1"/>
-        <text x="${w/2}" y="${h/2}" font-size="8" text-anchor="middle" fill="#333">Back (${w}x${h}mm)</text>
+      <g transform="translate(${w + padding * 2 + t}, ${h + padding * 2 + t})">
+        <path d="${backPath}" fill="none" stroke="#0066cc" stroke-width="1" />
+        <text x="${w/2}" y="${h/2}" text-anchor="middle" fill="#333" font-size="12">Back (${w}x${h}mm)</text>
       </g>
 
-      <!-- Left -->
-      <g transform="translate(${col3X}, ${row1Y})">
-        <path d="${leftD}" fill="none" stroke="#2a9d8f" stroke-width="1"/>
-        <text x="${d/2}" y="${h/2}" font-size="8" text-anchor="middle" fill="#333">Left (${d}x${h}mm)</text>
+      <g transform="translate(${(w + padding) * 2 + padding + t}, ${padding + t})">
+        <path d="${leftPath}" fill="none" stroke="#0066cc" stroke-width="1" />
+        <text x="${d/2}" y="${h/2}" text-anchor="middle" fill="#333" font-size="12">Left (${d}x${h}mm)</text>
       </g>
 
-      <!-- Right -->
-      <g transform="translate(${col3X}, ${row2Y})">
-        <path d="${rightD}" fill="none" stroke="#2a9d8f" stroke-width="1"/>
-        <text x="${d/2}" y="${h/2}" font-size="8" text-anchor="middle" fill="#333">Right (${d}x${h}mm)</text>
+      <g transform="translate(${(w + padding) * 2 + padding + t}, ${h + padding * 2 + t})">
+        <path d="${rightPath}" fill="none" stroke="#0066cc" stroke-width="1" />
+        <text x="${d/2}" y="${h/2}" text-anchor="middle" fill="#333" font-size="12">Right (${d}x${h}mm)</text>
       </g>
     </svg>
   `;
 
-  document.getElementById('svg-preview').innerHTML = svgContent;
+  preview.innerHTML = svgContent;
 }
 
-// Download SVG Functionality
 function downloadSVG() {
-  const svgElement = document.getElementById('svg-preview').querySelector('svg');
+  const svgElement = document.getElementById("box-svg");
   if (!svgElement) return;
-
+  
   const serializer = new XMLSerializer();
   let source = serializer.serializeToString(svgElement);
-
   if (!source.match(/^<svg[^>]+xmlns="http\:\/\/www\.w3\.org\/2000\/svg"/)) {
     source = source.replace(/^<svg/, '<svg xmlns="http://www.w3.org/2000/svg"');
   }
-
+  
   const blob = new Blob([source], { type: "image/svg+xml;charset=utf-8" });
   const url = URL.createObjectURL(blob);
+  
   const downloadLink = document.createElement("a");
   downloadLink.href = url;
   downloadLink.download = "box-flatpack-full.svg";
   document.body.appendChild(downloadLink);
+  downloadLink.click();
   downloadLink.click();
   document.body.removeChild(downloadLink);
 }
@@ -150,6 +136,4 @@ document.querySelectorAll('input').forEach(input => {
 
 document.getElementById('download-btn').addEventListener('click', downloadSVG);
 
-// Initial Render
 renderBox();
-document.getElementById('kerf').addEventListener('input', generateBox);
